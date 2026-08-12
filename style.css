@@ -33,6 +33,10 @@ h3 { font-size:1rem; margin:0; font-weight:600; }
   text-transform:uppercase; letter-spacing:.04em; }
 h2 { font-size:.8rem; text-transform:uppercase; letter-spacing:.06em;
   color:var(--muted); margin:32px 0 12px; }
+.columns { display:flex; gap:40px; align-items:flex-start; margin-top:32px; }
+.column { flex:1; min-width:0; }
+.column h2 { margin-top:0; }
+@media (max-width:760px) { .columns { display:block; margin-top:0; } .column h2 { margin-top:32px; } }
 .goal { padding:14px 0; border-bottom:1px solid var(--line); }
 .row { display:flex; justify-content:space-between; align-items:baseline; gap:10px; }
 .name { font-weight:500; color:var(--ink); text-decoration:none; }
