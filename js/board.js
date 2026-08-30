@@ -1,15 +1,14 @@
 /**
  * A click-to-move chess board.
  *
- * Rendering is a plain 8x8 grid of Unicode glyphs — the filled (black) glyph is
- * used for both colours and separated by fill and outline in CSS, which renders
- * consistently everywhere and needs no piece assets.
+ * Rendering is a plain 8x8 grid; pieces are the Cburnett SVG set (the one
+ * Lichess ships), vendored in `web/vendor/pieces/` and applied as CSS
+ * backgrounds, so a piece is one element with a data attribute.
  *
  * The board draws whatever position it is given and reports attempted moves; it
  * owns no game state, so drilling, review, and deviation replay all reuse it.
  */
 
-const GLYPH = { p: '♟', n: '♞', b: '♝', r: '♜', q: '♛', k: '♚' };
 const FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 const RANKS = ['8', '7', '6', '5', '4', '3', '2', '1'];
 
@@ -88,7 +87,7 @@ export class Board {
     this.el.innerHTML = this._squares().map((square) => {
       const file = FILES.indexOf(square[0]);
       const rank = Number(square[1]);
-      const shade = (file + rank) % 2 === 0 ? 'dark' : 'light';
+      const shade = (file + rank) % 2 === 0 ? 'light' : 'dark';
       const marks = [shade];
       if (square === this.selected) marks.push('sel');
       if (square === this.errorSquare) marks.push('err');
@@ -97,10 +96,24 @@ export class Board {
 
       const piece = board[square];
       const glyph = piece
-        ? `<span class="piece ${piece.color}">${GLYPH[piece.type]}</span>` : '';
-      const dot = dests.includes(square) ? '<span class="dot"></span>' : '';
-      return `<div class="sq ${marks.join(' ')}" data-sq="${square}">${dot}${glyph}</div>`;
+        ? `<span class="piece" data-p="${piece.color}${piece.type.toUpperCase()}"></span>`
+        : '';
+      const dot = dests.includes(square)
+        ? `<span class="dot${piece ? ' capture' : ''}"></span>` : '';
+      const coords = this._coords(square);
+      return `<div class="sq ${marks.join(' ')}" data-sq="${square}">` +
+        `${dot}${glyph}${coords}</div>`;
     }).join('');
+  }
+
+  /** File letters along the bottom edge, rank numbers up the left edge. */
+  _coords(square) {
+    const files = this.orientation === 'w' ? FILES : [...FILES].reverse();
+    const ranks = this.orientation === 'w' ? RANKS : [...RANKS].reverse();
+    const out = [];
+    if (square[1] === ranks[7]) out.push(`<span class="coord file">${square[0]}</span>`);
+    if (square[0] === files[0]) out.push(`<span class="coord rank">${square[1]}</span>`);
+    return out.join('');
   }
 
   _click(event) {
