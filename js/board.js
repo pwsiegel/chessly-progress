@@ -26,15 +26,18 @@ export class Board {
     this.chess = null;
     this.selected = null;
     this.lastMove = null;
+    this.marks = [];
     this.errorSquare = null;
 
     this.el.className = 'board';
     this.el.addEventListener('click', (e) => this._click(e));
   }
 
-  setPosition(chess, lastMove = null) {
+  /** `marks` tint squares by tone ('good' | 'bad'), for replaying a decision. */
+  setPosition(chess, lastMove = null, marks = []) {
     this.chess = chess;
     this.lastMove = lastMove;
+    this.marks = marks;
     this.selected = null;
     this.errorSquare = null;
     this.render();
@@ -88,11 +91,14 @@ export class Board {
       const file = FILES.indexOf(square[0]);
       const rank = Number(square[1]);
       const shade = (file + rank) % 2 === 0 ? 'light' : 'dark';
-      const marks = [shade];
-      if (square === this.selected) marks.push('sel');
-      if (square === this.errorSquare) marks.push('err');
-      if (this.lastMove && square === this.lastMove.from) marks.push('from');
-      if (this.lastMove && square === this.lastMove.to) marks.push('to');
+      const classes = [shade];
+      if (square === this.selected) classes.push('sel');
+      if (square === this.errorSquare) classes.push('err');
+      if (this.lastMove && square === this.lastMove.from) classes.push('from');
+      if (this.lastMove && square === this.lastMove.to) classes.push('to');
+      for (const m of this.marks) {
+        if (square === m.from || square === m.to) classes.push(`mk-${m.tone}`);
+      }
 
       const piece = board[square];
       const glyph = piece
@@ -101,7 +107,7 @@ export class Board {
       const dot = dests.includes(square)
         ? `<span class="dot${piece ? ' capture' : ''}"></span>` : '';
       const coords = this._coords(square);
-      return `<div class="sq ${marks.join(' ')}" data-sq="${square}">` +
+      return `<div class="sq ${classes.join(' ')}" data-sq="${square}">` +
         `${dot}${glyph}${coords}</div>`;
     }).join('');
   }

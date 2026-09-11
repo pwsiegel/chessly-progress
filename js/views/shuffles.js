@@ -52,7 +52,7 @@ export async function render() {
     .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
 
   const node = el(`<div>
-    <a class="back" href="#/">&larr; all courses</a>
+    <a class="back" href="#/">&larr; back</a>
     <h1>Drill shuffles</h1>
     <p class="sub">Unfinished shuffles can be resumed; finished ones can be replayed.
       Only finished shuffles count toward accuracy.</p>

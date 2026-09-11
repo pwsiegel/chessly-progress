@@ -2,9 +2,12 @@
 import { state, boot, selectAccount } from './data.js';
 import { esc, el } from './ui.js';
 import * as store from './store.js';
+import { stamp, goBack } from './nav.js';
 import * as overview from './views/overview.js';
 import * as course from './views/course.js';
 import * as deviations from './views/deviations.js';
+import * as games from './views/games.js';
+import * as game from './views/game.js';
 import * as variations from './views/variations.js';
 import * as review from './views/review.js';
 import * as drill from './views/drill.js';
@@ -16,8 +19,9 @@ let currentView = null;
 
 const ROUTES = [
   [/^\/?$/, () => overview.render()],
-  [/^\/deviations$/, () => deviations.renderList()],
+  [/^\/games$/, () => games.renderList()],
   [/^\/deviation\/(.+)$/, (index) => deviations.renderOne({ index })],
+  [/^\/game\/(\d+)$/, (index) => game.render({ index })],
   [/^\/course\/([^/]+)$/, (slug) => course.render({ slug })],
   [/^\/course\/([^/]+)\/variations$/, (slug) => variations.render({ slug }), true],
   [/^\/course\/([^/]+)\/review\/([^/]+)$/,
@@ -44,7 +48,7 @@ function renderNav() {
   nav.hidden = false;
   nav.innerHTML = `
     <a href="#/">Courses</a>
-    <a href="#/deviations">Deviations</a>
+    <a href="#/games">Games</a>
     ${state.local ? '<a href="#/shuffles">Drills</a>' : ''}
     <span class="spacer"></span>
     ${accounts.length > 1 ? `<select id="account">${accounts.map((a) =>
@@ -91,6 +95,7 @@ function markActive() {
 }
 
 async function route() {
+  stamp();
   const path = location.hash.slice(1) || '/';
   markActive();
   for (const [pattern, view, localOnly] of ROUTES) {
@@ -112,10 +117,19 @@ async function route() {
   app.replaceChildren(el('<p class="error">Page not found.</p>'));
 }
 
+// Every screen's back link walks your own path, not a fixed destination.
+app.addEventListener('click', (e) => {
+  const link = e.target.closest('a.back');
+  if (!link) return;
+  e.preventDefault();
+  goBack();
+});
+
 document.addEventListener('keydown', (e) => {
   if (currentView && currentView.onKey) currentView.onKey(e);
 });
 window.addEventListener('hashchange', route);
+window.addEventListener('listmodechange', route);
 
 (async () => {
   themeToggle();

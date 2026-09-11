@@ -1,7 +1,6 @@
-/** Course cards and overall deviations — the page the public site opens on. */
+/** Course cards — the page the public site opens on. */
 import { state, courseList, progressFor } from '../data.js';
 import { esc, metric, checks, gameCount, categoryStats, el } from '../ui.js';
-import { deviationTable } from './deviations.js';
 
 function card(course) {
   const p = progressFor(course.id);
@@ -47,18 +46,9 @@ export function render() {
       <div class="column">${section('White', courses.filter((c) => c.color === 'W'))}</div>
       <div class="column">${section('Black', courses.filter((c) => c.color === 'B'))}</div>
     </div>
-    <div id="devs"></div>
     <footer>Account: ${esc(state.meta.accounts.find((a) => a.key === state.accountKey).label)}
       &middot; updated ${esc(state.meta.generated)}
       &middot; games open from your side, colored by result.</footer>
   </div>`);
-
-  const rows = state.account.deviations;
-  if (rows.length) {
-    const holder = node.querySelector('#devs');
-    holder.innerHTML = '<h2>Top deviations</h2><p class="note">Where you most often ' +
-      'leave your prep, and the course move.</p>';
-    holder.appendChild(deviationTable(rows.slice(0, 25), { showCourse: true }));
-  }
   return node;
 }

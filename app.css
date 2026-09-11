@@ -112,8 +112,10 @@ tr.pick:hover td { background:var(--raise); }
 
 .split { display:flex; gap:28px; align-items:flex-start; }
 @media (max-width:900px) { .split { display:block; } }
-.split .left { flex:none; }
-.split .right { flex:1; min-width:0; }
+/* The board fixes the left column's width; without the cap a long move list
+   under it grows to max-content and squeezes the right column to nothing. */
+.split .left { flex:none; width:min(480px, 92vw); }
+.split .right { flex:1; min-width:240px; }
 
 /* Board. Pieces are the Cburnett set (CC BY-SA 3.0, Colin M.L. Burnett),
    vendored from lichess in web/vendor/pieces/. Square and highlight colours
@@ -128,6 +130,10 @@ tr.pick:hover td { background:var(--raise); }
 .board .sq.dark { background:#b58863; }
 .board .sq.from::after, .board .sq.to::after { content:""; position:absolute;
   inset:0; background:rgba(155,199,0,.41); }
+.board .sq.mk-good::after { content:""; position:absolute; inset:0;
+  background:rgba(106,168,79,.52); }
+.board .sq.mk-bad::after { content:""; position:absolute; inset:0;
+  background:rgba(196,62,44,.52); }
 .board .sq.sel::after { content:""; position:absolute; inset:0;
   background:rgba(20,85,30,.45); }
 .board .sq.err::after { content:""; position:absolute; inset:0;
@@ -192,6 +198,17 @@ tr.pick:hover td { background:var(--raise); }
   margin-bottom:12px; background:var(--raise); }
 .card .row { align-items:center; }
 .empty { color:var(--muted); font-size:.9rem; padding:24px 0; }
+
+.segmented { display:inline-flex; margin:14px 0; padding:2px; gap:2px;
+  border:1px solid var(--line); border-radius:999px; background:var(--raise); }
+.segmented button { font:inherit; font-size:.8rem; line-height:1.4; padding:4px 16px;
+  border:none; border-radius:999px; background:none; color:var(--muted);
+  cursor:pointer; transition:background .12s, color .12s; }
+.segmented button:hover:not(.on) { color:var(--ink); }
+.segmented button.on { background:var(--fill); color:#fff; }
+.paged { margin-top:10px; }
+.pager { display:flex; align-items:center; gap:10px; margin-top:10px; }
+.pager .action { padding:3px 10px; font-size:.78rem; }
 footer { margin-top:36px; color:var(--muted); font-size:.75rem; }
 footer.credit { width:75%; max-width:1200px; margin:48px auto 0; padding-top:12px;
   border-top:1px solid var(--line); font-size:.72rem; }

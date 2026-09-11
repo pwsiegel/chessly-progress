@@ -2,14 +2,14 @@
  * Deviations: where my own games left the prep.
  *
  * The table is the disclosure a public build is allowed to make — my move and
- * the course's move in that position. A local build adds the board view, which
- * can also show which course variations run through the position and start a
- * drill from them.
+ * the course's move in that position — and is rendered wherever a deviation
+ * list appears. A local build adds the board view, which can also show which
+ * course variations run through the position and start a drill from them.
  */
 import { state, courseById, gamesAt } from '../data.js';
-import { esc, gameLinks, el } from '../ui.js';
-import { Board, moveList } from '../board.js';
-import { replay, variationsThroughAnywhere } from '../lines.js';
+import { esc, gameLinks, moveCount, el } from '../ui.js';
+import { markedBoard, variationsThroughAnywhere } from '../lines.js';
+import { stepper } from '../stepper.js';
 import { createShuffle } from './shuffles.js';
 
 export function deviationTable(rows, { showCourse = false, showStudy = false } = {}) {
@@ -42,20 +42,6 @@ export function deviationTable(rows, { showCourse = false, showStudy = false } =
   return table;
 }
 
-export function renderList() {
-  const node = el(`<div>
-    <a class="back" href="#/">&larr; all courses</a>
-    <h1>Deviations</h1>
-    <p class="sub">Every position where I left the course line, most recent first.</p>
-    <div id="table"></div>
-  </div>`);
-  const rows = state.account.deviations;
-  if (!rows.length) node.querySelector('#table').innerHTML =
-    '<p class="empty">No deviations recorded for this account.</p>';
-  else node.querySelector('#table').appendChild(deviationTable(rows, { showCourse: true }));
-  return node;
-}
-
 export function renderOne({ index }) {
   const row = state.account.deviations[Number(index)];
   if (!row) return el('<p class="error">No such deviation.</p>');
@@ -63,7 +49,7 @@ export function renderOne({ index }) {
   const orientation = row.line.length % 2 === 0 ? 'w' : 'b';
 
   const node = el(`<div>
-    <a class="back" href="#/">&larr; all courses</a>
+    <a class="back" href="#/">&larr; back</a>
     <h1>Move ${row.move}: <span class="bad">${esc(row.san)}</span>
       instead of <span class="good">${esc(row.taught.join('/'))}</span></h1>
     <p class="sub">${esc(course ? course.name : '')} &middot;
@@ -71,8 +57,8 @@ export function renderOne({ index }) {
       last ${esc(row.date || '—')}</p>
     <div class="split">
       <div class="left"><div class="boardhost"></div>
-        <div class="boardbar"><span class="dim">You are ${orientation === 'w'
-          ? 'White' : 'Black'}; it is your move.</span></div>
+        <div class="boardbar"><span class="dim">Your move in red,
+          the course move in green.</span></div>
       </div>
       <div class="right">
         <h2>Your game to this point</h2>
@@ -83,12 +69,9 @@ export function renderOne({ index }) {
     </div>
   </div>`);
 
-  const chess = replay(row.line, row.line.length);
-  const board = new Board(node.querySelector('.boardhost'),
-    { orientation, interactive: false });
-  board.setPosition(chess);
-  node.querySelector('.mvs').appendChild(
-    moveList(row.line, row.line.length - 1, () => {}));
+  const { sans, at, marks } = markedBoard({
+    moves: [...row.line, row.san].join(' '), at: row.line.length + 1, taught: row.taught });
+  node.onKey = stepper(node, { sans, at, marks, orientation });
 
   if (state.local) {
     const groups = variationsThroughAnywhere(row.courseId, row.fen);
@@ -114,7 +97,7 @@ export function renderOne({ index }) {
         <div class="varlist">${hits.map(({ variation }) => `
           <div class="item" data-id="${esc(variation.id)}">
             <span>Ch ${variation.ch} · St ${variation.st} · #${variation.i}</span>
-            <span class="dim">${variation.sans.length} plies</span>
+            <span class="dim">${moveCount(variation.sans)} moves</span>
           </div>`).join('')}</div>
       </div>`);
 

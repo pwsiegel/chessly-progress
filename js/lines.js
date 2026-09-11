@@ -75,6 +75,34 @@ export function variationsThroughAnywhere(homeCourseId, fen) {
     .filter((group) => group.hits.length);
 }
 
+/**
+ * Where a board opens on a game, and what to mark there.
+ *
+ * `at` is the decisive move — the one I deviated with, or the last one still in
+ * book. A deviation marks my move bad and the course's move good, both drawn
+ * from the position I decided in; anything else marks the book move good.
+ */
+export function markedBoard({ moves = '', at = 0, taught = [] }) {
+  const sans = moves ? moves.split(' ') : [];
+  const decided = Math.min(at, sans.length);
+  const before = sans.slice(0, Math.max(0, decided - 1));
+  const marks = [];
+
+  const mark = (san, tone) => {
+    const probe = replay(before, before.length);
+    try {
+      const move = probe.move(san);
+      if (move) marks.push({ from: move.from, to: move.to, tone });
+    } catch { /* a move that no longer fits the position it was recorded from */ }
+  };
+
+  if (decided) {
+    taught.forEach((san) => mark(san, 'good'));
+    mark(sans[decided - 1], taught.length ? 'bad' : 'good');
+  }
+  return { sans, at: decided, marks };
+}
+
 /** A Chess instance wound forward through `count` moves of a variation. */
 export function replay(sans, count) {
   const chess = new Chess();

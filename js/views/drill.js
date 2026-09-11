@@ -9,7 +9,7 @@
  * run only counts toward accuracy when the last variation is done.
  */
 import { courseById, variationById } from '../data.js';
-import { esc, el } from '../ui.js';
+import { esc, moveCount, el } from '../ui.js';
 import { Board } from '../board.js';
 import { getShuffle, saveShuffle } from '../store.js';
 import { replay } from '../lines.js';
@@ -26,7 +26,7 @@ export async function render({ shuffleId }) {
   const mine = course && course.color === 'W' ? 'w' : 'b';
 
   const node = el(`<div>
-    <a class="back" href="#/shuffles">&larr; shuffles</a>
+    <a class="back" href="#/shuffles">&larr; back</a>
     <div class="row"><h1>${esc(shuffle.name)}</h1>
       <span class="count" id="counter"></span></div>
     <div class="progressline" id="progress"></div>
@@ -88,7 +88,7 @@ export async function render({ shuffleId }) {
     chess = replay([], 0);
     sideEl.innerHTML = `<h2>Variation</h2>
       <p class="sub">Ch ${variation.ch} · St ${variation.st} · #${variation.i}
-        &middot; ${variation.sans.length} plies</p>
+        &middot; ${moveCount(variation.sans)} moves</p>
       <p class="note">You are ${mine === 'w' ? 'White' : 'Black'}.</p>`;
     say('');
     advanceOpponent();

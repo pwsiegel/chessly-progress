@@ -1,4 +1,5 @@
 /** Small shared rendering helpers. */
+import { listMode, setListMode } from './prefs.js';
 
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g,
   (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -63,6 +64,65 @@ export function accuracyText(stat) {
   const cls = pct >= 80 ? 'good' : pct >= 50 ? '' : 'bad';
   return `<span class="${cls}">${stat.correct}/${stat.attempts}</span> ` +
     `<span class="dim">${pct}%</span>`;
+}
+
+/** A line's length in moves; half-moves are an implementation detail, never shown. */
+export const moveCount = (sans) => Math.ceil(sans.length / 2);
+
+/** UTC day of an epoch-ms timestamp, matching the dates the bundle writes. */
+export const dateOf = (ts) =>
+  (ts ? new Date(ts).toISOString().slice(0, 10) : '\u2014');
+
+/** The games/deviations switch. One per page; the choice is global. */
+export function listToggle() {
+  const mode = listMode();
+  const option = (value, label) =>
+    `<button type="button" role="tab" data-mode="${value}"
+       aria-selected="${mode === value}"${mode === value ? ' class="on"' : ''}>${label}</button>`;
+  const node = el(`<div class="segmented" role="tablist">${
+    option('games', 'games')}${option('deviations', 'deviations')}</div>`);
+  node.addEventListener('click', (e) => {
+    const button = e.target.closest('button[data-mode]');
+    if (button) setListMode(button.dataset.mode);
+  });
+  return node;
+}
+
+/**
+ * A table in pages, with its own controls.
+ *
+ * `render` receives one page of rows and returns the element to show; each
+ * call site keeps its own page, so a course page can paginate every chapter
+ * independently.
+ */
+export function paginated(rows, size, render) {
+  const node = el('<div class="paged"><div class="page"></div><div class="pager"></div></div>');
+  const body = node.querySelector('.page');
+  const pager = node.querySelector('.pager');
+  const pages = Math.max(1, Math.ceil(rows.length / size));
+  let page = 0;
+
+  const draw = () => {
+    const start = page * size;
+    body.replaceChildren(render(rows.slice(start, start + size)));
+    pager.innerHTML = pages > 1
+      ? `<button class="action" data-step="-1"${page ? '' : ' disabled'}>&larr; prev</button>
+         <span class="count">${start + 1}&ndash;${Math.min(start + size, rows.length)}
+           of ${rows.length}</span>
+         <button class="action" data-step="1"${
+           page === pages - 1 ? ' disabled' : ''}>next &rarr;</button>`
+      : `<span class="count">${rows.length} row${rows.length === 1 ? '' : 's'}</span>`;
+  };
+
+  pager.addEventListener('click', (e) => {
+    const button = e.target.closest('button[data-step]');
+    if (!button) return;
+    page = Math.max(0, Math.min(pages - 1, page + Number(button.dataset.step)));
+    draw();
+  });
+
+  draw();
+  return node;
 }
 
 export function el(html) {

@@ -4,14 +4,14 @@
  * know it — and the controls to turn a selection into a drill shuffle.
  */
 import { courseBySlug, variationsFor, linesFor } from '../data.js';
-import { esc, reachText, accuracyText, el } from '../ui.js';
+import { esc, reachText, accuracyText, moveCount, el } from '../ui.js';
 import { listShuffles, accuracy } from '../store.js';
 import { createShuffle } from './shuffles.js';
 
 const COLUMNS = [
   ['label', 'variation'],
   ['moves', 'first moves'],
-  ['plies', 'plies'],
+  ['length', 'moves'],
   ['p', 'reach'],
   ['acc', 'accuracy'],
   ['last', 'last drilled'],
@@ -22,7 +22,7 @@ const value = (v, stats, key) => {
   switch (key) {
     case 'label': return v.ch * 1e6 + v.st * 1e3 + v.i;
     case 'moves': return v.sans.join(' ');
-    case 'plies': return v.sans.length;
+    case 'length': return v.sans.length;
     case 'p': return v.p;
     case 'acc': return stat && stat.attempts ? stat.correct / stat.attempts : -1;
     case 'last': return stat && stat.last ? stat.last : '';
@@ -45,7 +45,7 @@ export async function render({ slug }) {
   let windowSize = 0;
 
   const node = el(`<div>
-    <a class="back" href="#/course/${esc(course.slug)}">&larr; ${esc(course.name)}</a>
+    <a class="back" href="#/course/${esc(course.slug)}">&larr; back</a>
     <h1>${esc(course.name)}</h1>
     <p class="sub">${variations.length} variations.
       <b>Reach</b> is how often this line occurs at 1800–2200 given the opening;
@@ -98,7 +98,7 @@ export async function render({ slug }) {
         <td><a href="#/course/${esc(course.slug)}/review/${esc(v.id)}"
               >Ch ${v.ch} · St ${v.st} · #${v.i}</a></td>
         <td class="moves-preview">${esc(v.sans.slice(0, 8).join(' '))}…</td>
-        <td class="num dim">${v.sans.length}</td>
+        <td class="num dim">${moveCount(v.sans)}</td>
         <td class="num">${reachText(v)}</td>
         <td class="num">${accuracyText(stat)}</td>
         <td class="num dim">${stat && stat.last ? esc(stat.last.slice(0, 10)) : '—'}</td>

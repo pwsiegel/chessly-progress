@@ -20,7 +20,7 @@ export function render({ slug, variationId }) {
   let cursor = 0;                    // moves played so far
 
   const node = el(`<div>
-    <a class="back" href="#/course/${esc(course.slug)}/variations">&larr; variations</a>
+    <a class="back" href="#/course/${esc(course.slug)}/variations">&larr; back</a>
     <h1>${esc(course.name)}</h1>
     <div class="split">
       <div class="left">
