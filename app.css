@@ -200,6 +200,9 @@ tr.qualifying td:first-child { box-shadow:inset 3px 0 0 var(--fill); }
 .card { border:1px solid var(--line); border-radius:8px; padding:14px 16px;
   margin-bottom:12px; background:var(--raise); }
 .card .row { align-items:center; }
+.divider { display:flex; align-items:center; gap:12px; margin:28px 0 14px;
+  color:var(--muted); font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; }
+.divider::before, .divider::after { content:""; flex:1; border-top:1px dashed var(--line); }
 .empty { color:var(--muted); font-size:.9rem; padding:24px 0; }
 
 .segmented { display:inline-flex; margin:14px 0; padding:2px; gap:2px;

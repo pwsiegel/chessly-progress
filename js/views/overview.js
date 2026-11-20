@@ -15,17 +15,23 @@ function card(course) {
   </div>`;
 }
 
-function section(title, courses) {
-  if (!courses.length) return '';
+function cards(courses) {
   const order = (c) => {
     const p = progressFor(c.id) || {};
     return [p.metAll ? 0 : 1, p.metCourse ? 0 : 1, -(p.courseWins || 0)];
   };
-  const sorted = [...courses].sort((a, b) => {
+  return [...courses].sort((a, b) => {
     const [x, y] = [order(a), order(b)];
     return x[0] - y[0] || x[1] - y[1] || x[2] - y[2];
-  });
-  return `<h2>${title}</h2>${sorted.map(card).join('')}`;
+  }).map(card).join('');
+}
+
+/** Chessly courses first; my own custom courses below a divider. */
+function section(title, courses) {
+  if (!courses.length) return '';
+  const custom = courses.filter((c) => c.custom);
+  return `<h2>${title}</h2>${cards(courses.filter((c) => !c.custom))}` +
+    (custom.length ? `<div class="divider"><span>custom courses</span></div>${cards(custom)}` : '');
 }
 
 export function render() {
