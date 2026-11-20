@@ -93,6 +93,9 @@ td.good, .good { color:var(--fill); font-weight:600; }
 td.dim, .dim { color:var(--muted); }
 tr.pick { cursor:pointer; }
 tr.pick:hover td { background:var(--raise); }
+tr.qualifying td { background:color-mix(in srgb, var(--fill) 13%, transparent); }
+tr.qualifying:hover td { background:color-mix(in srgb, var(--fill) 22%, transparent); }
+tr.qualifying td:first-child { box-shadow:inset 3px 0 0 var(--fill); }
 .moves-preview { color:var(--muted); font-size:.78rem; white-space:nowrap;
   overflow:hidden; text-overflow:ellipsis; max-width:260px; }
 

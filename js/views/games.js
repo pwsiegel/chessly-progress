@@ -19,8 +19,10 @@ export const PAGE = 50;
 const RESULT = { win: 'good', loss: 'bad', draw: 'dim' };
 
 function deviation(game) {
+  const moves = `${game.depth} move${game.depth === 1 ? '' : 's'}`;
+  if (game.category === 'won') return `&#10003; in-book win (${moves})`;
   const who = { youDev: 'you', oppDev: 'opp' }[game.category];
-  if (!who) return `none (${game.depth} move${game.depth === 1 ? '' : 's'})`;
+  if (!who) return `none (${moves})`;
   return game.move ? `${who} (move ${game.move})` : who;
 }
 
@@ -38,11 +40,11 @@ export function gameTable(rows, { showCourse = false } = {}) {
   const body = rows.map((game) => {
     const course = courseById(game.courseId);
     const index = state.account.games.indexOf(game);
-    return `<tr class="pick" data-i="${index}">
+    return `<tr class="pick${game.category === 'won' ? ' qualifying' : ''}" data-i="${index}">
       <td class="dim">${esc(dateOf(game.ts))}</td>
       ${showCourse ? `<td>${esc(course ? course.name : '?')}</td>` : ''}
       <td class="links">${gameLinks([game])}</td>
-      <td class="${RESULT[game.result] || 'dim'}">${esc(deviation(game))}</td>
+      <td class="${RESULT[game.result] || 'dim'}">${deviation(game)}</td>
     </tr>`;
   }).join('');
 
