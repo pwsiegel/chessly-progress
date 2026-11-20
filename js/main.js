@@ -1,6 +1,6 @@
 /** Boot, navigation, and hash routing. */
-import { state, boot, selectAccount } from './data.js';
-import { esc, el } from './ui.js';
+import { state, boot, selectAccount, timeControls } from './data.js';
+import { esc, el, speedToggle } from './ui.js';
 import * as store from './store.js';
 import { stamp, goBack } from './nav.js';
 import * as overview from './views/overview.js';
@@ -51,10 +51,15 @@ function renderNav() {
     <a href="#/games">Games</a>
     ${state.local ? '<a href="#/shuffles">Drills</a>' : ''}
     <span class="spacer"></span>
+    <span id="speed"></span>
     ${accounts.length > 1 ? `<select id="account">${accounts.map((a) =>
       `<option value="${esc(a.key)}"${a.key === state.accountKey ? ' selected' : ''}
        >${esc(a.label)}</option>`).join('')}</select>` : ''}
     ${state.local ? '<span class="who" id="who"></span>' : ''}`;
+
+  if (timeControls().length > 1) {
+    nav.querySelector('#speed').replaceChildren(speedToggle(timeControls()));
+  }
 
   const picker = nav.querySelector('#account');
   if (picker) {
@@ -130,6 +135,12 @@ document.addEventListener('keydown', (e) => {
 });
 window.addEventListener('hashchange', route);
 window.addEventListener('listmodechange', route);
+// Deviation rows are indexed per filter, so an open one has no counterpart after a switch.
+window.addEventListener('speedchange', () => {
+  renderNav();
+  if (location.hash.startsWith('#/deviation/')) location.hash = '#/games';
+  else route();
+});
 
 (async () => {
   themeToggle();

@@ -6,7 +6,7 @@
  * different angle, so one global toggle switches between them here and on a
  * course page.
  */
-import { state, courseById } from '../data.js';
+import { state, courseById, shownGames, view } from '../data.js';
 import { esc, el, gameLinks, dateOf, listToggle, paginated } from '../ui.js';
 import { listMode } from '../prefs.js';
 import { deviationTable } from './deviations.js';
@@ -81,6 +81,6 @@ export function renderList() {
 
   node.querySelector('#toggle').replaceChildren(listToggle());
   node.querySelector('#list').replaceChildren(
-    modeList(state.account.games, state.account.deviations, PAGE, { showCourse: true }));
+    modeList(shownGames(), view().deviations, PAGE, { showCourse: true }));
   return node;
 }

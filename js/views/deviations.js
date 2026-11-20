@@ -6,7 +6,7 @@
  * list appears. A local build adds the board view, which can also show which
  * course variations run through the position and start a drill from them.
  */
-import { state, courseById, gamesAt } from '../data.js';
+import { state, courseById, gamesAt, view } from '../data.js';
 import { esc, gameLinks, moveCount, el } from '../ui.js';
 import { markedBoard, variationsThroughAnywhere } from '../lines.js';
 import { stepper } from '../stepper.js';
@@ -19,7 +19,7 @@ export function deviationTable(rows, { showCourse = false, showStudy = false } =
 
   const body = rows.map((row) => {
     const course = courseById(row.courseId);
-    const index = state.account.deviations.indexOf(row);
+    const index = view().deviations.indexOf(row);
     return `<tr class="pick" data-i="${index}">
       <td class="n">${row.count}</td>
       <td class="dim">${esc(row.date || '—')}</td>
@@ -43,7 +43,7 @@ export function deviationTable(rows, { showCourse = false, showStudy = false } =
 }
 
 export function renderOne({ index }) {
-  const row = state.account.deviations[Number(index)];
+  const row = view().deviations[Number(index)];
   if (!row) return el('<p class="error">No such deviation.</p>');
   const course = courseById(row.courseId);
   const orientation = row.line.length % 2 === 0 ? 'w' : 'b';

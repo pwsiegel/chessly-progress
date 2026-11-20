@@ -1,5 +1,5 @@
 /** Course cards — the page the public site opens on. */
-import { state, courseList, progressFor } from '../data.js';
+import { state, courseList, progressFor, view } from '../data.js';
 import { esc, metric, checks, gameCount, categoryStats, el } from '../ui.js';
 
 function card(course) {
@@ -29,7 +29,7 @@ function section(title, courses) {
 }
 
 export function render() {
-  const { summary } = state.account;
+  const { summary } = view();
   const courses = courseList();
   const node = el(`<div>
     <h1>Chessly Progress</h1>

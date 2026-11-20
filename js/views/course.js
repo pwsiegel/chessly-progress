@@ -1,5 +1,5 @@
 /** One course: progress, chapter breakdown, and the games or deviations behind it. */
-import { state, courseBySlug, progressFor, gamesAt } from '../data.js';
+import { state, courseBySlug, progressFor, gamesAt, view } from '../data.js';
 import { esc, metric, checks, gameCount, categoryStats, listToggle, el } from '../ui.js';
 import { modeList, PAGE } from './games.js';
 
@@ -14,7 +14,7 @@ export function render({ slug }) {
   const p = progressFor(course.id);
   if (!p) return el('<p class="error">No progress data for this course.</p>');
 
-  const deviations = state.account.deviations.filter((d) => d.courseId === course.id);
+  const deviations = view().deviations.filter((d) => d.courseId === course.id);
   const node = el(`<div>
     <a class="back" href="#/">&larr; back</a>
     <div class="row"><h1>${esc(course.name)} ${gameCount(p.games)}</h1>${checks(p)}</div>

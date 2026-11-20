@@ -6,7 +6,7 @@
  * after its last book move.
  */
 import { state, courseById } from '../data.js';
-import { esc, el, gameLinks, dateOf } from '../ui.js';
+import { esc, el, gameLinks, dateOf, speedIcon } from '../ui.js';
 import { markedBoard } from '../lines.js';
 import { stepper } from '../stepper.js';
 
@@ -32,7 +32,7 @@ export function render({ index }) {
     <a class="back" href="#/games">&larr; back</a>
     <h1>${heading}</h1>
     <p class="sub">${esc(course ? course.name : '?')} &middot;
-      ${esc(dateOf(game.ts))} &middot; ${esc(game.result)} as
+      ${esc(dateOf(game.ts))} &middot; ${speedIcon(game.speed)} ${esc(game.speed || '')} &middot; ${esc(game.result)} as
       ${orientation === 'w' ? 'White' : 'Black'}</p>
     <div class="split">
       <div class="left"><div class="boardhost"></div>

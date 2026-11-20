@@ -6,6 +6,8 @@
  * Mode is therefore a property of the data, never a flag someone can flip.
  */
 
+import { speedFilter } from './prefs.js';
+
 const DATA = 'data';
 
 export const state = {
@@ -51,8 +53,24 @@ export const courseBySlug = (slug) =>
 export const courseById = (id) =>
   state.meta.courses.find((c) => c.id === id) || null;
 
+/** The time controls this build tracks, in configured order. */
+export const timeControls = () => state.meta.settings.timeControls || [];
+
+/** The account's progress, summary, and deviations under the time-control filter. */
+export function view() {
+  return state.account.views[speedFilter()] || state.account.views.all;
+}
+
+/** The account's games under the time-control filter. */
+export function shownGames() {
+  const speed = speedFilter();
+  return speed in state.account.views && speed !== 'all'
+    ? state.account.games.filter((g) => g.speed === speed)
+    : state.account.games;
+}
+
 /** Per-account progress for a course. */
-export const progressFor = (courseId) => state.account.courses[courseId] || null;
+export const progressFor = (courseId) => view().courses[courseId] || null;
 
 /** Course lines, present only in a local build. */
 export const linesFor = (courseId) =>

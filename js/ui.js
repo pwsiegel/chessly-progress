@@ -1,5 +1,5 @@
 /** Small shared rendering helpers. */
-import { listMode, setListMode } from './prefs.js';
+import { listMode, setListMode, speedFilter, setSpeedFilter } from './prefs.js';
 
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g,
   (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -27,10 +27,25 @@ export function checks(progress) {
 export const gameCount = (n) =>
   `<span class="ngames">${n} game${n === 1 ? '' : 's'}</span>`;
 
+const ICONS = {
+  bullet: '<circle cx="12" cy="12" r="5" fill="currentColor"/>',
+  blitz: '<path d="M13 2 4 14h7l-1 8 9-12h-7z" fill="currentColor"/>',
+  rapid: '<circle cx="12" cy="14" r="7.5"/><path d="M12 10v4l2.5 2M10 2.5h4M12 2.5v4"/>',
+  classical: '<path d="M6 3h12M6 21h12M7 3c0 6 10 5 10 9s-10 3-10 9M17 3c0 6-10 5-10 9s10 3 10 9"/>',
+};
+
+/** A small time-control symbol, labelled for hover and screen readers. */
+export function speedIcon(speed) {
+  if (!ICONS[speed]) return '';
+  return `<svg class="tc" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img"
+    aria-label="${esc(speed)}"><title>${esc(speed)}</title>${ICONS[speed]}</svg>`;
+}
+
 export function gameLinks(games) {
   return games.map((g) =>
     `<a class="${esc(g.result === 'win' ? 'won' : g.result === 'loss' ? 'lost' : '')}" ` +
-    `href="${esc(g.url)}" target="_blank" rel="noopener">` +
+    `href="${esc(g.url)}" target="_blank" rel="noopener">${speedIcon(g.speed)}` +
     `${esc(g.opponent)}${g.rating ? ` (${g.rating})` : ''}</a>`).join(' ');
 }
 
@@ -84,6 +99,23 @@ export function listToggle() {
   node.addEventListener('click', (e) => {
     const button = e.target.closest('button[data-mode]');
     if (button) setListMode(button.dataset.mode);
+  });
+  return node;
+}
+
+/** The global time-control filter: all, then each tracked speed. */
+export function speedToggle(speeds) {
+  const current = speeds.includes(speedFilter()) ? speedFilter() : 'all';
+  const option = (value, label) =>
+    `<button type="button" role="tab" data-speed="${esc(value)}"
+       aria-selected="${current === value}"${current === value ? ' class="on"' : ''}
+       >${label}</button>`;
+  const node = el(`<div class="segmented compact" role="tablist" aria-label="time control">${
+    option('all', 'all')}${speeds.map((s) => option(s, `${speedIcon(s)}${esc(s)}`)).join('')
+  }</div>`);
+  node.addEventListener('click', (e) => {
+    const button = e.target.closest('button[data-speed]');
+    if (button) setSpeedFilter(button.dataset.speed);
   });
   return node;
 }
